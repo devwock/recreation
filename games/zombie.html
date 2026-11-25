@@ -918,13 +918,6 @@
           playerGrid('check-pick', { big: true, mark: i => S.players[i].checked ? '✓ 확인함' : '' }));
       }
       const p = S.players[modal.p];
-      if (!modal.shown) {
-        return modalFrame(`${esc(p.name)}님 차례`, `
-          <div class="card stack center">
-            <p style="margin:0">화면을 <strong>${esc(p.name)}</strong>님에게만 보여주세요.</p>
-            <div><button class="primary big" data-act="check-show">역할 보기</button></div>
-          </div>`, false);
-      }
       return modalFrame(`${esc(p.name)}님 역할`, `
         <div class="stack">
           <div class="role ${p.zombie0 ? 'zombie' : 'human'}">
@@ -1195,7 +1188,7 @@
         save(SAVED_KEY, null);
         commit();
       },
-      'open-check': () => { ensureRoles(); modal = { kind: 'check', p: null, shown: false }; commit(); },
+      'open-check': () => { ensureRoles(); modal = { kind: 'check', p: null }; commit(); },
       'close': () => { modal = null; render(); },
       'open-replay': () => {
         modal = { kind: 'replay', steps: buildReplay(), step: 0, playing: true, speed: 1 };
@@ -1211,13 +1204,13 @@
       },
       'rp-prev': () => replayGo(modal.step - 1, false),
       'rp-next': () => replayGo(modal.step + 1, true),
-      'check-pick': el => { modal.p = Number(el.dataset.i); modal.shown = false; render(); },
-      'check-show': () => {
-        modal.shown = true;
+      // 이름을 누르면 바로 역할이 보이고, 연 것으로 확인 처리한다.
+      'check-pick': el => {
+        modal.p = Number(el.dataset.i);
         S.players[modal.p].checked = true;
         commit();
       },
-      'check-hide': () => { modal.p = null; modal.shown = false; render(); },
+      'check-hide': () => { modal.p = null; render(); },
       'pick': el => {
         const i = Number(el.dataset.i);
         if (picked == null) { picked = i; render(); return; }

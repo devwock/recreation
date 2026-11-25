@@ -8,5 +8,12 @@ window.GAMES = [
     title: '좀비 게임',
     desc: '3라운드 동안 1:1 터치로 감염이 퍼지는 비밀 역할 게임. 치료제 1개로 한 번 되돌릴 수 있습니다.',
     file: 'zombie.html'
+  },
+  {
+    id: 'sword_and_shield',
+    icon: '⚔️',
+    title: '검과 방패',
+    desc: '두 팀이 선언만으로 공격·방어하는 블러핑 게임. 거짓을 의심해 맞히면 상대가, 틀리면 내가 죽습니다. 리더가 죽으면 패배.',
+    file: 'sword_and_shield.html'
   }
 ];

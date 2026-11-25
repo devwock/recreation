@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>검과 방패</title>
+  <style>
+    :root {
+      --bg: #f6f5f2;
+      --surface: #ffffff;
+      --text: #1d1d1f;
+      --muted: #6b6b70;
+      --border: #e3e1dc;
+      --accent: #2f7d4f;
+      --accent-soft: #e4f1e8;
+      --v: #2b62b8;
+      --v-soft: #e1eaf8;
+      --f: #b3412e;
+      --f-soft: #f7e3df;
+      --danger: #b3412e;
+      --warn-bg: #fdf3dc;
+      --warn-text: #7a5a10;
+      --overlay: #f6f5f2;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141416;
+        --surface: #1e1e21;
+        --text: #ececee;
+        --muted: #9a9aa1;
+        --border: #2e2e33;
+        --accent: #5cc285;
+        --accent-soft: #1d3326;
+        --v: #7fa8ec;
+        --v-soft: #1c2840;
+        --f: #ec7c68;
+        --f-soft: #3a211d;
+        --danger: #ec7c68;
+        --warn-bg: #372d14;
+        --warn-text: #e8c66f;
+        --overlay: #141416;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+      line-height: 1.5;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+    .back {
+      display: inline-block;
+      margin-bottom: 24px;
+      color: var(--muted);
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .back:hover { color: var(--accent); }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      margin: 32px 0 12px;
+      font-size: 16px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    h3 { margin: 0; font-size: 17px; }
+    .sub { margin: 0; color: var(--muted); }
+    .card {
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .stack > * + * { margin-top: 16px; }
+    input[type=text], select {
+      font: inherit;
+      padding: 10px 12px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      min-width: 0;
+    }
+    input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+    button {
+      font: inherit;
+      font-weight: 600;
+      padding: 10px 16px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover:not(:disabled) { border-color: var(--accent); }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    button.primary {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    button.big { padding: 14px 22px; font-size: 17px; }
+    button.danger { color: var(--danger); }
+    button.on {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+    .muted { color: var(--muted); }
+    .center { text-align: center; }
+    .warn {
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      font-size: 14px;
+    }
+
+    /* 팀 색 */
+    .tv { color: var(--v); }
+    .tf { color: var(--f); }
+    .tag {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .tag.V { background: var(--v-soft); color: var(--v); }
+    .tag.F { background: var(--f-soft); color: var(--f); }
+    .tag.dead { background: var(--f-soft); color: var(--f); }
+    .tag.ok { background: var(--accent-soft); color: var(--accent); }
+    .tag.plain { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+
+    /* 설정: 이름 카드 */
+    .name-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .name-card {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 8px 8px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .name-card.V { border-color: var(--v); background: var(--v-soft); }
+    .name-card.F { border-color: var(--f); background: var(--f-soft); }
+    .name-card .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .name-card .no { color: var(--muted); font-weight: 500; font-size: 13px; margin-right: 6px; }
+    .name-card button { flex: none; padding: 4px 10px; font-size: 13px; }
+    .name-card button.team-V.on { color: #fff; background: var(--v); border-color: var(--v); outline: 0; }
+    .name-card button.team-F.on { color: #fff; background: var(--f); border-color: var(--f); outline: 0; }
+    .name-card .del {
+      padding: 2px 6px;
+      border: 0;
+      background: none;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1;
+    }
+    .name-card .del:hover { color: var(--danger); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .stat {
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+    .stat .label { font-size: 13px; color: var(--muted); }
+    .stat .value { font-size: 28px; font-weight: 700; }
+    .stat.V .value { color: var(--v); }
+    .stat.F .value { color: var(--f); }
+
+    /* 선택용 버튼 격자 */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .grid button { padding: 14px 10px; position: relative; word-break: keep-all; }
+    .grid button .mark { display: block; font-size: 12px; font-weight: 500; color: var(--muted); }
+    .grid button.V { border-color: var(--v); color: var(--v); }
+    .grid button.F { border-color: var(--f); color: var(--f); }
+    .grid.big { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .grid.big button { min-height: 110px; padding: 20px 12px; font-size: 22px; border-radius: 14px; }
+    .grid.big button .mark { font-size: 14px; margin-top: 4px; }
+    @media (max-width: 600px) {
+      .grid.big { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* 두 팀 나란히 */
+    .teams { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) {
+      .teams { grid-template-columns: 1fr; }
+    }
+    .team-col h3 { margin-bottom: 10px; }
+    .team-col.V h3 { color: var(--v); }
+    .team-col.F h3 { color: var(--f); }
+
+    /* 진행 화면 플레이어 카드 */
+    .pc {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+    .pc + .pc { margin-top: 8px; }
+    .pc.current { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: -2px; background: var(--accent-soft); }
+    .pc.dead { opacity: .5; }
+    .pc.dead .pc-name { text-decoration: line-through; }
+    .pc-head { display: flex; align-items: center; gap: 8px; }
+    .pc-name { font-size: 19px; font-weight: 700; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pc-no { color: var(--muted); font-weight: 600; }
+    .pc-arms { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin-top: 6px; font-size: 14px; }
+    .pc-arms .side { color: var(--muted); font-size: 12px; margin-right: 4px; }
+    .pc-arms .real { color: var(--warn-text); font-size: 12px; }
+    .pc-foot { margin-top: 4px; font-size: 13px; color: var(--danger); font-weight: 600; }
+
+    /* 진행 패널 */
+    .turn-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .turn-who { font-size: clamp(26px, 6vw, 40px); font-weight: 800; letter-spacing: -0.02em; }
+    .alive-counts { display: flex; gap: 18px; font-size: 17px; font-weight: 700; }
+    .step-label { font-size: 14px; font-weight: 700; color: var(--muted); }
+    .declare { font-size: clamp(20px, 4.5vw, 28px); font-weight: 700; line-height: 1.4; }
+    .last-turn {
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: 15px;
+    }
+    .panel-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .pick-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .pick-row .lbl { width: 44px; font-size: 14px; font-weight: 700; color: var(--muted); }
+
+    /* 표 */
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap; }
+    tr:last-child td { border-bottom: 0; }
+    td.r { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    td .sub-line { display: block; font-size: 13px; color: var(--muted); }
+    td .sub-line.bad { color: var(--danger); font-weight: 600; }
+    td .sub-line.good { color: var(--accent); font-weight: 600; }
+
+    /* 개인 화면: 뒤 화면이 비치지 않도록 불투명하게 덮는다 */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      overflow-y: auto;
+      background: var(--overlay);
+    }
+    .overlay .wrap { padding-top: 48px; }
+    .role {
+      padding: 40px 16px;
+      border-radius: 16px;
+      text-align: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+    .role.leader { background: var(--warn-bg); color: var(--warn-text); border-color: transparent; }
+    .role .emoji { font-size: 72px; line-height: 1; }
+    .role .name { font-size: 32px; font-weight: 800; margin-top: 8px; }
+    .weapon-pick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .weapon-pick button { padding: 16px 6px; font-size: 18px; }
+    .weapon-pick button .mark { display: block; font-size: 12px; font-weight: 500; color: var(--muted); }
+    @media (max-width: 600px) {
+      .weapon-pick { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" id="back" href="../index.html">← 게임 목록</a>
+    <h1>⚔️ 검과 방패</h1>
+    <div id="app"></div>
+  </div>
+  <div id="modal"></div>
+
+  <script>
+    // devwock.github.io 아래 다른 페이지와 로컬스토리지를 공유하므로 접두어를 붙인다.
+    const KEY = 'recreation:sword_and_shield:state';
+    const SAVED_KEY = 'recreation:sword_and_shield:saved';   // '이어하기'용으로 보관한 게임
+
+    // 팀 인원별 팀당 무기 수 [검, 쌍검, 방패, 맨손]. 5명은 원작 구성.
+    // 나머지는 원작의 게임 길이·사망 비율에 맞춘 시뮬레이션 결과 (work/games/sword_and_shield.md 5장)
+    const WEAPONS = {
+      3: [2, 1, 2, 1],
+      4: [3, 1, 2, 2],
+      5: [4, 1, 3, 2],
+      6: [4, 2, 4, 2],
+      7: [5, 2, 4, 3],
+      8: [6, 2, 5, 3],
+      9: [7, 2, 5, 4],
+      10: [8, 2, 6, 4]
+    };
+    const MIN_TEAM = 3, MAX_TEAM = 10;
+    const KINDS = ['sword', 'dual', 'shield', 'bare'];
+    const W = {
+      sword: { name: '검', icon: '🗡️' },
+      dual: { name: '쌍검', icon: '⚔️' },
+      shield: { name: '방패', icon: '🛡️' },
+      bare: { name: '맨손', icon: '✋' }
+    };
+    const DMG = { sword: 1, dual: 2 };
+    const SHIELD_MAX = 3;
+    const ARMS = ['L', 'R'];
+    const ARM_NAME = { L: '왼쪽', R: '오른쪽' };
+    const TEAM_NAME = { V: 'Verita', F: 'Falso' };
+    const other = t => t === 'V' ? 'F' : 'V';
+    const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩';
+
+    // ---------- 상태 ----------
+
+    function newState(prev) {
+      return {
+        phase: 'setup',            // setup → prep → playing → final
+        roster: prev ? prev.roster.map(r => ({ ...r })) : [],   // { name, team: 'V' | 'F' | null }
+        players: [],               // { name, team, leader, checked, L, R, order }
+        firstTeam: null,           // 1라운드 선공 팀
+        reveal: false,             // 진행 화면에 실제 무기·리더 표시 (심판용)
+        events: []                 // { type: 'attack', arm, claim, target } | { type: 'pass' }
+                                   // | { type: 'defend', arm | null } | { type: 'doubt', by } | { type: 'nodoubt' }
+      };
+    }
+
+    function load(key = KEY) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function save(key = KEY, value = S) {
+      try {
+        if (value == null) localStorage.removeItem(key);
+        else localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        // 저장 실패 시에도 현재 화면에서는 계속 진행할 수 있다.
+      }
+    }
+
+    // 게임 화면에 들어오면 항상 설정 화면부터 시작한다.
+    // 명단은 유지하고, 리더·무기 등 준비 내용은 아직 게임을 시작하지 않았을 때만 유지한다.
+    // 진행 중이던 게임은 SAVED_KEY 에 따로 보관해 '이어하기'로 되돌릴 수 있게 한다.
+    let saved = load(SAVED_KEY);
+    function toSetup(prev) {
+      if (prev.phase === 'playing' || prev.phase === 'final') {
+        saved = prev;
+        save(SAVED_KEY, saved);
+        return newState(prev);
+      }
+      return { ...newState(prev), players: prev.players || [], firstTeam: prev.firstTeam ?? null };
+    }
+    let S = (() => {
+      const prev = load();
+      return prev ? toSetup(prev) : newState();
+    })();
+    let modal = null;      // 현재 열린 모달 상태
+    let draft = {};        // 진행 화면에서 고르는 중인 공격 선언 { arm, claim, target } (저장하지 않음)
+    let nameError = '';    // 이름 입력 오류 문구 (저장하지 않음)
+
+    // ---------- 계산 ----------
+
+    const teamSize = () => {
+      const v = S.roster.filter(r => r.team === 'V').length;
+      return v === S.roster.filter(r => r.team === 'F').length ? v : null;
+    };
+    function stockOf(n) {
+      const row = WEAPONS[n];
+      return row ? Object.fromEntries(KINDS.map((k, i) => [k, row[i]])) : null;
+    }
+    const membersOf = team => S.players.map((_, i) => i).filter(i => S.players[i].team === team);
+    // 공격 순서대로 정렬한 팀원
+    const orderOf = team => membersOf(team).sort((a, b) => (S.players[a].order ?? 99) - (S.players[b].order ?? 99));
+    const noOf = i => S.players[i].order != null ? CIRCLED[S.players[i].order] : '';
+
+    // 팀 재고에서 플레이어 except 를 뺀 나머지가 이미 가져간 수를 제외한 남은 무기 수
+    function remainingStock(team, except = null) {
+      const left = stockOf(membersOf(team).length);
+      for (const i of membersOf(team)) {
+        if (i === except) continue;
+        for (const a of ARMS) if (S.players[i][a]) left[S.players[i][a]]--;
+      }
+      return left;
+    }
+
+    // 이벤트 기록을 처음부터 다시 적용해 현재 상태와 턴 기록을 만든다.
+    function compute() {
+      const P = S.players;
+      const st = P.map(() => ({
+        alive: true, why: null, round: null,
+        used: { L: 0, R: 0 },            // 팔별 방패 선언 누적 피해 (진짜·거짓 모두)
+        claims: { L: [], R: [] },        // 팔별로 선언한 무기
+        shown: { L: false, R: false }    // 의심으로 공개된 팔
+      }));
+      const turns = [];
+      let round = 1, lead = S.firstTeam, done = new Set(), last = null;
+      let winner = null, deadLeader = null;
+      let stage = 'act', t = null;
+
+      // 직전 공격자의 상대 팀에서 아직 공격하지 않은 생존자 중 가장 앞 순서, 없으면 같은 팀에서
+      const nextOf = team => orderOf(team).find(i => st[i].alive && !done.has(i));
+      const next = () => last == null
+        ? nextOf(lead) ?? nextOf(other(lead))
+        : nextOf(other(P[last].team)) ?? nextOf(P[last].team);
+      let cur = next();
+
+      const kill = (i, why) => {
+        st[i].alive = false;
+        st[i].why = why;
+        st[i].round = round;
+        t.deaths.push({ p: i, why });
+        if (P[i].leader && winner == null) {
+          winner = other(P[i].team);
+          deadLeader = i;
+        }
+      };
+      const endTurn = () => {
+        done.add(t.a);
+        last = t.a;
+        t.open = false;
+        t = null;
+        stage = 'act';
+        if (winner != null) return;
+        cur = next();
+        if (cur == null) {
+          round += 1;
+          lead = other(lead);
+          done = new Set();
+          last = null;
+          cur = next();
+        }
+      };
+      // 의심: 해당 팔의 실제 무기를 공개해 선언과 비교한다.
+      const doubt = (x, arm, claim, by) => {
+        st[x].shown[arm] = true;
+        return { by, lie: P[x][arm] !== claim, real: P[x][arm] };
+      };
+
+      for (const e of S.events) {
+        if (winner != null) break;
+        if (stage === 'act') {
+          t = { round, a: cur, kind: e.type, deaths: [], open: true };
+          turns.push(t);
+          if (e.type === 'pass') { endTurn(); continue; }
+          Object.assign(t, { arm: e.arm, claim: e.claim, target: e.target });
+          st[cur].claims[e.arm].push(e.claim);
+          stage = 'doubtAtk';
+        } else if (stage === 'doubtAtk') {
+          if (e.type === 'doubt') {
+            t.ad = doubt(t.a, t.arm, t.claim, e.by);
+            if (t.ad.lie) { kill(t.a, '공격 거짓'); endTurn(); continue; }
+            kill(e.by, '의심 실패');
+            // 대상 본인이 의심했다가 죽었다면 방어할 사람이 없다.
+            if (winner != null || !st[t.target].alive) { endTurn(); continue; }
+          }
+          stage = 'defend';
+        } else if (stage === 'defend') {
+          t.def = e.arm;
+          if (e.arm == null) { kill(t.target, '피격'); endTurn(); continue; }
+          st[t.target].used[e.arm] += DMG[t.claim];
+          st[t.target].claims[e.arm].push('shield');
+          stage = 'doubtDef';
+        } else if (stage === 'doubtDef') {
+          if (e.type === 'doubt') {
+            t.dd = doubt(t.target, t.def, 'shield', e.by);
+            if (t.dd.lie) kill(t.target, '방어 거짓');
+            else kill(e.by, '의심 실패');
+          }
+          endTurn();
+        }
+      }
+      return { st, turns, round, lead, cur, stage, open: t, winner, deadLeader, done };
+    }
+
+    // 이 팔로 이번 피해를 방패로 막을 수 있는지 (선언 누적 3 제한)
+    const canShield = (s, arm, dmg) => s.used[arm] + dmg <= SHIELD_MAX;
+
+    // 같은 팔에 이전과 다른 무기를 선언하는지 (심판용 경고)
+    function conflict(s, i, arm, kind) {
+      if (s.shown[arm] && S.players[i][arm] !== kind) return `이미 공개된 ${ARM_NAME[arm]} 무기는 ${W[S.players[i][arm]].name}입니다.`;
+      const prev = s.claims[arm].find(k => k !== kind);
+      return prev ? `${ARM_NAME[arm]}을 이전에 ${W[prev].name}(으)로 선언했습니다.` : '';
+    }
+
+    // ---------- 진행 ----------
+
+    function shuffle(list) {
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+      }
+      return list;
+    }
+
+    function drawLeaders() {
+      for (const team of ['V', 'F']) {
+        const ids = membersOf(team);
+        const pick = ids[Math.floor(Math.random() * ids.length)];
+        ids.forEach(i => { S.players[i].leader = i === pick; S.players[i].checked = false; });
+      }
+    }
+
+    // 명단·팀이 준비 이후 바뀌었으면 플레이어를 새로 만들고 리더를 다시 뽑는다.
+    function ensurePlayers() {
+      const same = S.players.length === S.roster.length &&
+        S.players.every((p, i) => p.name === S.roster[i].name && p.team === S.roster[i].team);
+      if (same) return;
+      S.players = S.roster.map(r => ({ name: r.name, team: r.team, leader: false, checked: false, L: null, R: null, order: null }));
+      S.firstTeam = null;
+      drawLeaders();
+    }
+
+    // 리더 확인·무기 장착을 이미 했다면, 명단·팀을 바꾸기 전에 초기화됨을 알린다.
+    function confirmPrepReset() {
+      if (!S.players.some(p => p.checked || p.L || p.R)) return true;
+      if (!confirm('이미 리더를 확인했거나 무기를 장착한 플레이어가 있습니다. 명단이나 팀을 바꾸면 리더를 다시 뽑고 무기도 다시 장착해야 합니다. 계속할까요?')) return false;
+      S.players = [];
+      return true;
+    }
+
+    const armed = p => !!(p.L && p.R);
+    const ordered = team => membersOf(team).every(i => S.players[i].order != null);
+
+    // ---------- 화면 ----------
+
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const nameOf = i => esc(S.players[i].name);
+    const who = i => `<strong class="t${S.players[i].team.toLowerCase()}">${nameOf(i)}</strong>`;
+    const teamTag = t => `<span class="tag ${t}">${TEAM_NAME[t]}</span>`;
+    const wpn = k => `${W[k].icon} ${W[k].name}`;
+    const stockText = s => KINDS.map(k => `${W[k].name} ${s[k]}`).join(' · ');
+    const app = document.getElementById('app');
+    const modalEl = document.getElementById('modal');
+
+    function renderSetup() {
+      const n = S.roster.length;
+      const v = S.roster.filter(r => r.team === 'V').length;
+      const f = S.roster.filter(r => r.team === 'F').length;
+      const none = n - v - f;
+      const size = teamSize();
+      let warn = '';
+      if (none) warn = `팀을 정하지 않은 플레이어가 ${none}명 있습니다.`;
+      else if (v !== f) warn = '두 팀 인원이 같아야 합니다.';
+      else if (v < MIN_TEAM || v > MAX_TEAM) warn = `팀당 ${MIN_TEAM}~${MAX_TEAM}명이어야 합니다. (전체 ${MIN_TEAM * 2}~${MAX_TEAM * 2}명)`;
+      const blocking = !!warn;
+
+      return `
+        ${saved ? `
+          <div class="card row" style="margin-top:24px;justify-content:space-between">
+            <span><strong>${saved.phase === 'final' ? '지난 게임 결과가 있습니다.' : '진행 중인 게임이 있습니다.'}</strong>
+              <span class="muted">${saved.players.length}명 · ${saved.phase === 'final' ? '종료' : '진행 중'}</span></span>
+            <button class="primary" data-act="resume">${saved.phase === 'final' ? '결과 보기' : '이어하기'}</button>
+          </div>` : ''}
+        <p class="sub" style="margin-top:24px">플레이어를 입력하고 드래프트 결과대로 팀을 정하세요.</p>
+        <div class="card stack" style="margin-top:16px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label for="name" style="font-size:14px;font-weight:600">플레이어 이름 (${n}명)</label>
+            <div class="row">
+              <input type="text" id="name" placeholder="이름 입력 후 Enter" style="flex:1;min-width:200px">
+              <button data-act="add-name">확인</button>
+            </div>
+            ${nameError ? `<div class="warn">${nameError}</div>` : ''}
+          </div>
+          ${n ? `<div class="name-cards">${S.roster.map((r, i) => `
+            <div class="name-card ${r.team || ''}">
+              <span class="nm"><span class="no">${i + 1}</span>${esc(r.name)}</span>
+              <button class="team-V ${r.team === 'V' ? 'on' : ''}" data-act="set-team" data-i="${i}" data-team="V" aria-label="${esc(r.name)} Verita 팀">V</button>
+              <button class="team-F ${r.team === 'F' ? 'on' : ''}" data-act="set-team" data-i="${i}" data-team="F" aria-label="${esc(r.name)} Falso 팀">F</button>
+              <button class="del" data-act="del-name" data-i="${i}" aria-label="${esc(r.name)} 삭제">×</button>
+            </div>`).join('')}</div>
+            <div class="row">
+              <button data-act="random-teams" ${n % 2 || n < MIN_TEAM * 2 ? 'disabled' : ''}>무작위로 팀 나누기</button>
+              <span class="muted" style="font-size:13px">드래프트를 하지 않을 때만 사용하세요.</span>
+            </div>`
+            : '<span class="muted">아직 등록된 플레이어가 없습니다.</span>'}
+          <div class="stats">
+            <div class="stat V"><div class="label">Verita</div><div class="value">${v}</div></div>
+            <div class="stat F"><div class="label">Falso</div><div class="value">${f}</div></div>
+          </div>
+          ${size && stockOf(size) ? `<p class="muted" style="margin:0">팀당 무기 ${size * 2}개: <strong>${stockText(stockOf(size))}</strong></p>` : ''}
+          ${warn ? `<div class="warn">${warn}</div>` : ''}
+          <div class="row">
+            <button class="primary big" data-act="to-prep" ${blocking ? 'disabled' : ''}>다음: 게임 준비</button>
+          </div>
+        </div>`;
+    }
+
+    function renderPrep() {
+      const P = S.players;
+      const n = P.length;
+      const checked = P.filter(p => p.checked).length;
+      const armedCount = P.filter(armed).length;
+      const allOrdered = ordered('V') && ordered('F');
+      const ready = armedCount === n && allOrdered && S.firstTeam;
+
+      const stockLine = team => {
+        const left = remainingStock(team);
+        return `<div>${teamTag(team)} 남은 무기: ${KINDS.map(k => `${W[k].name} <strong>${left[k]}</strong>`).join(' · ')}</div>`;
+      };
+      const orderCol = team => `
+        <div class="team-col ${team}">
+          <h3>${TEAM_NAME[team]}</h3>
+          <div class="grid">${membersOf(team).map(i => `
+            <button data-act="set-order" data-i="${i}" class="${P[i].order != null ? 'on' : ''}">
+              ${P[i].order != null ? CIRCLED[P[i].order] + ' ' : ''}${nameOf(i)}
+            </button>`).join('')}</div>
+          <div class="row" style="margin-top:10px">
+            <button data-act="random-order" data-team="${team}">무작위</button>
+            <button data-act="clear-order" data-team="${team}">초기화</button>
+          </div>
+        </div>`;
+
+      return `
+        <p class="sub">게임 준비 · Verita ${n / 2}명 vs Falso ${n / 2}명 · 팀당 ${stockText(stockOf(n / 2))}</p>
+
+        <h2>1. 리더 확인 (${checked}/${n})</h2>
+        <div class="card stack">
+          <p style="margin:0">팀마다 리더 1명을 무작위로 뽑았습니다. 같은 팀원에게도 비공개이므로 각자 화면에서 확인합니다.</p>
+          <div class="row">
+            <button class="primary" data-act="open-leader">리더 확인</button>
+            <button data-act="redraw">다시 뽑기</button>
+          </div>
+        </div>
+
+        <h2>2. 무기 장착 (${armedCount}/${n})</h2>
+        <div class="card stack">
+          <p style="margin:0">팀 상의로 1명당 2개씩 나눈 뒤, 각자 왼손·오른손에 비공개로 장착합니다.</p>
+          ${stockLine('V')}
+          ${stockLine('F')}
+          <div class="row"><button class="primary" data-act="open-arm">무기 장착</button></div>
+        </div>
+
+        <h2>3. 공격 순서</h2>
+        <div class="card stack">
+          <p class="muted" style="margin:0">순서대로 누르세요. 다시 누르면 해제됩니다.</p>
+          <div class="teams">${orderCol('V')}${orderCol('F')}</div>
+        </div>
+
+        <h2>4. 선공 팀</h2>
+        <div class="card row">
+          <button data-act="coin">🪙 동전 던지기</button>
+          <button class="${S.firstTeam === 'V' ? 'on' : ''}" data-act="first" data-team="V">Verita 선공</button>
+          <button class="${S.firstTeam === 'F' ? 'on' : ''}" data-act="first" data-team="F">Falso 선공</button>
+          ${S.firstTeam ? `<span>→ ${teamTag(S.firstTeam)} 선공</span>` : ''}
+        </div>
+
+        <div class="row" style="margin-top:24px">
+          <button class="primary big" data-act="start" ${ready ? '' : 'disabled'}>게임 시작</button>
+          ${ready ? '' : `<span class="muted">${[armedCount < n ? '무기 장착' : '', allOrdered ? '' : '공격 순서', S.firstTeam ? '' : '선공 팀'].filter(Boolean).join(', ')}을(를) 마치세요.</span>`}
+        </div>`;
+    }
+
+    // 플레이어 카드 한 팔: 선언 이력(공개 정보)과 실제 무기(심판용)
+    function armCell(i, s, arm, reveal) {
+      const p = S.players[i];
+      const kinds = [...new Set(s.claims[arm])];
+      let pub = kinds.length ? kinds.map(k => k === 'shield' ? `${W.shield.icon} ${s.used[arm]}/${SHIELD_MAX}` : wpn(k)).join(' / ') : '<span class="muted">?</span>';
+      if (s.shown[arm]) pub = `${wpn(p[arm])} <span class="tag plain">공개</span>`;
+      const real = reveal && !s.shown[arm] ? ` <span class="real">(${W[p[arm]].name})</span>` : '';
+      return `<div><span class="side">${ARM_NAME[arm][0]}</span>${pub}${real}</div>`;
+    }
+
+    function playerCards(team, c, reveal) {
+      return orderOf(team).map(i => {
+        const s = c.st[i];
+        const cls = [s.alive ? '' : 'dead', i === c.cur && c.winner == null ? 'current' : ''].join(' ').trim();
+        const mark = !s.alive ? '' : i === c.cur ? '<span class="tag ok">차례</span>'
+          : c.done.has(i) ? '<span class="tag plain">공격함</span>' : '';
+        return `<div class="pc ${cls}">
+          <div class="pc-head">
+            <span class="pc-no">${noOf(i)}</span>
+            <span class="pc-name">${nameOf(i)}${reveal && S.players[i].leader ? ' 👑' : ''}</span>
+            ${mark}
+          </div>
+          <div class="pc-arms">${ARMS.map(a => armCell(i, s, a, reveal)).join('')}</div>
+          ${s.alive ? '' : `<div class="pc-foot">사망 · R${s.round} ${s.why}</div>`}
+        </div>`;
+      }).join('');
+    }
+
+    // 의심 결과 한 줄
+    function doubtText(d, x) {
+      return `${who(d.by)} 의심 → 실제 ${wpn(d.real)} · ${d.lie ? `거짓, ${who(x)} 사망` : `사실, ${who(d.by)} 사망`}`;
+    }
+
+    // 턴 요약 (진행 화면 '직전 턴'과 기록 표에서 사용)
+    function turnSummary(t) {
+      if (t.kind === 'pass') return `${who(t.a)} 패스`;
+      let s = `${who(t.a)}: ${ARM_NAME[t.arm]} ${wpn(t.claim)}으로 ${who(t.target)} 공격`;
+      if (t.ad) s += `<br>${doubtText(t.ad, t.a)}`;
+      if (t.def === null) s += `<br>${who(t.target)} 방어 안 함 → 사망`;
+      else if (t.def) {
+        s += `<br>${who(t.target)}: ${ARM_NAME[t.def]} 방패로 방어`;
+        if (t.dd) s += `<br>${doubtText(t.dd, t.target)}`;
+        else if (!t.open) s += ' → 성공';
+      }
+      return s;
+    }
+
+    // 의심할 사람 고르기: 선언한 사람을 뺀 생존자
+    function doubterGrid(c, declarer) {
+      return `<div class="grid">${S.players.map((p, i) => i).filter(i => c.st[i].alive && i !== declarer).map(i =>
+        `<button class="${S.players[i].team}" data-act="doubt" data-i="${i}">${nameOf(i)}<span class="mark">의심</span></button>`).join('')}</div>`;
+    }
+
+    function renderPlaying() {
+      const c = compute();
+      const reveal = S.reveal;
+      const t = c.open;
+      const a = t ? t.a : c.cur;
+      const aliveN = team => membersOf(team).filter(i => c.st[i].alive).length;
+      const prev = c.turns.filter(x => !x.open).pop();
+      let body = '';
+
+      if (c.stage === 'act') {
+        const s = c.st[a];
+        const opp = orderOf(other(S.players[a].team)).filter(i => c.st[i].alive);
+        const warn = reveal && draft.arm && draft.claim ? conflict(s, a, draft.arm, draft.claim) : '';
+        const lie = reveal && draft.arm && draft.claim && S.players[a][draft.arm] !== draft.claim;
+        const ok = draft.arm && draft.claim && draft.target != null;
+        body = `
+          <div class="step-label">공격 선언</div>
+          <div class="pick-row"><span class="lbl">팔</span>${ARMS.map(x =>
+            `<button class="${draft.arm === x ? 'on' : ''}" data-act="d-arm" data-v="${x}">${ARM_NAME[x]}</button>`).join('')}</div>
+          <div class="pick-row"><span class="lbl">무기</span>${['sword', 'dual'].map(k =>
+            `<button class="${draft.claim === k ? 'on' : ''}" data-act="d-claim" data-v="${k}">${wpn(k)}</button>`).join('')}</div>
+          <div class="pick-row"><span class="lbl">대상</span></div>
+          <div class="grid">${opp.map(i =>
+            `<button class="${S.players[i].team} ${draft.target === i ? 'on' : ''}" data-act="d-target" data-i="${i}">${noOf(i)} ${nameOf(i)}</button>`).join('')}</div>
+          ${lie ? `<div class="warn">심판용: 실제 ${ARM_NAME[draft.arm]} 무기는 ${W[S.players[a][draft.arm]].name}입니다 (거짓 선언).</div>` : ''}
+          ${warn ? `<div class="warn">⚠️ ${warn}</div>` : ''}
+          <div class="row">
+            <button class="primary big" data-act="attack" ${ok ? '' : 'disabled'}>공격 선언</button>
+            <button class="big" data-act="pass">패스</button>
+          </div>`;
+      } else if (c.stage === 'doubtAtk') {
+        body = `
+          <div class="declare">${who(t.a)}: ${ARM_NAME[t.arm]} ${wpn(t.claim)}으로 ${who(t.target)} 공격</div>
+          <div class="step-label">의심하는 사람이 있나요? (먼저 외친 1명)</div>
+          <div class="row"><button class="primary big" data-act="nodoubt">의심 없음 → 방어</button></div>
+          ${doubterGrid(c, t.a)}`;
+      } else if (c.stage === 'defend') {
+        const s = c.st[t.target];
+        const dmg = DMG[t.claim];
+        body = `
+          <div class="declare">${who(t.target)} 방어 <span class="muted" style="font-size:16px">(${W[t.claim].name}: 방패 ${dmg}회분)</span></div>
+          ${t.ad ? `<div class="last-turn">${doubtText(t.ad, t.a)}</div>` : ''}
+          <div class="row">${ARMS.map(x => {
+            const left = SHIELD_MAX - s.used[x];
+            const able = canShield(s, x, dmg);
+            const warn = reveal ? conflict(s, t.target, x, 'shield') : '';
+            return `<button class="big" data-act="defend" data-v="${x}" ${able ? '' : 'disabled'}>
+              ${W.shield.icon} ${ARM_NAME[x]} 방패 <span class="muted" style="font-size:13px">${left <= 0 ? '소멸' : able ? `남은 ${left}` : `남은 ${left}, 부족`}${reveal ? ` · 실제 ${W[S.players[t.target][x]].name}` : ''}${warn ? ' · ⚠️' : ''}</span>
+            </button>`;
+          }).join('')}
+            <button class="big danger" data-act="defend" data-v="">방어 안 함 (사망)</button>
+          </div>`;
+      } else if (c.stage === 'doubtDef') {
+        body = `
+          <div class="declare">${who(t.target)}: ${ARM_NAME[t.def]} 방패로 방어</div>
+          <div class="step-label">의심하는 사람이 있나요? (먼저 외친 1명)</div>
+          <div class="row"><button class="primary big" data-act="nodoubt">의심 없음 → 방어 성공</button></div>
+          ${doubterGrid(c, t.target)}`;
+      }
+
+      return `
+        <p class="sub">라운드 ${c.round} · ${teamTag(c.lead)} 선공</p>
+        <div class="card stack" style="margin-top:24px">
+          <div class="turn-head">
+            <div class="turn-who"><span class="pc-no">${noOf(a)}</span> ${who(a)} <span style="font-size:.6em">${c.stage === 'act' ? '차례' : '공격 중'}</span></div>
+            <div class="alive-counts"><span class="tv">Verita ${aliveN('V')}명</span><span class="tf">Falso ${aliveN('F')}명</span></div>
+          </div>
+          ${prev && c.stage === 'act' ? `<div class="last-turn"><span class="muted">직전 턴 ·</span> ${turnSummary(prev)}</div>` : ''}
+          ${body}
+          <div class="panel-controls">
+            <button data-act="toggle-reveal">${reveal ? '심판 정보 숨기기' : '심판 정보 보기'}</button>
+            <button data-act="undo" ${S.events.length ? '' : 'disabled'}>↶ 되돌리기</button>
+          </div>
+        </div>
+
+        <h2>플레이어 ${reveal ? '· 👑 리더, (괄호) 실제 무기' : ''}</h2>
+        <div class="teams">
+          <div class="team-col V"><h3>Verita</h3>${playerCards('V', c, reveal)}</div>
+          <div class="team-col F"><h3>Falso</h3>${playerCards('F', c, reveal)}</div>
+        </div>
+
+        <h2>기록 (${c.turns.length})</h2>
+        <div class="card">${logTable(c.turns, true)}</div>`;
+    }
+
+    // 턴 기록 표. newest: 최신 턴이 위
+    function logTable(turns, newest) {
+      if (!turns.length) return '<span class="muted">아직 기록이 없습니다.</span>';
+      const rows = newest ? turns.slice().reverse() : turns;
+      return `<div class="table-scroll"><table>
+        <thead><tr><th>R</th><th>진행</th><th>사망</th></tr></thead>
+        <tbody>${rows.map(t => `<tr>
+          <td class="r">${t.round}</td>
+          <td>${turnSummary(t)}${t.open ? ' <span class="tag plain">진행 중</span>' : ''}</td>
+          <td>${t.deaths.map(d => `<span class="tag dead">${nameOf(d.p)}</span>`).join(' ') || '<span class="muted">—</span>'}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+    }
+
+    function renderFinal() {
+      const c = compute();
+      const P = S.players;
+      const win = c.winner, lose = other(win);
+      const doubts = c.turns.flatMap(t => [t.ad, t.dd]).filter(Boolean);
+      const dead = c.st.filter(s => !s.alive).length;
+
+      return `
+        <p class="sub">게임 종료 · 라운드 ${c.st[c.deadLeader].round}</p>
+        <div class="card stack" style="margin-top:24px">
+          <div class="center t${win.toLowerCase()}" style="font-size:36px;font-weight:800">${TEAM_NAME[win]} 승리</div>
+          <p class="center" style="margin:0">${teamTag(lose)} 리더 ${who(c.deadLeader)} 사망 (${c.st[c.deadLeader].why})</p>
+          <div class="stats">
+            <div class="stat"><div class="label">사망</div><div class="value">${dead}명</div></div>
+            <div class="stat"><div class="label">의심 성공</div><div class="value">${doubts.filter(d => d.lie).length}</div></div>
+            <div class="stat"><div class="label">의심 실패</div><div class="value">${doubts.filter(d => !d.lie).length}</div></div>
+          </div>
+        </div>
+
+        <h2>플레이어</h2>
+        <div class="card table-scroll">
+          <table>
+            <thead><tr><th>팀</th><th>순서</th><th>이름</th><th>왼손</th><th>오른손</th><th>결과</th></tr></thead>
+            <tbody>${['V', 'F'].flatMap(orderOf).map(i => {
+              const s = c.st[i];
+              return `<tr>
+                <td>${teamTag(P[i].team)}</td>
+                <td class="r">${noOf(i)}</td>
+                <td style="font-weight:700">${esc(P[i].name)}${P[i].leader ? ' 👑' : ''}</td>
+                <td>${wpn(P[i].L)}${s.used.L ? ` <span class="muted">(방패 선언 ${s.used.L})</span>` : ''}</td>
+                <td>${wpn(P[i].R)}${s.used.R ? ` <span class="muted">(방패 선언 ${s.used.R})</span>` : ''}</td>
+                <td>${s.alive ? '<span class="tag ok">생존</span>' : `<span class="tag dead">사망</span> <span class="muted">R${s.round} ${s.why}</span>`}</td>
+              </tr>`;
+            }).join('')}</tbody>
+          </table>
+        </div>
+
+        <h2>기록 (${c.turns.length})</h2>
+        <div class="card">${logTable(c.turns, false)}</div>
+
+        <div class="row" style="margin-top:32px">
+          <button data-act="undo">↶ 마지막 입력 되돌리기</button>
+          <button class="primary" data-act="new-same">같은 명단으로 새 게임</button>
+          <button class="danger" data-act="reset-all">전체 초기화</button>
+        </div>`;
+    }
+
+    // ---------- 모달 ----------
+    // kind: 'leader'(리더 확인), 'arm'(무기 장착)
+
+    function playerPicker(act, mark) {
+      return ['V', 'F'].map(team => `
+        <h2 class="t${team.toLowerCase()}">${TEAM_NAME[team]}</h2>
+        <div class="grid big">${membersOf(team).map(i => {
+          const m = mark(i);
+          return `<button data-act="${act}" data-i="${i}">${nameOf(i)}${m ? `<span class="mark">${m}</span>` : ''}</button>`;
+        }).join('')}</div>`).join('');
+    }
+
+    function modalFrame(title, body, closable = true) {
+      return `<div class="overlay"><div class="wrap">
+        <div class="row" style="justify-content:space-between;margin-bottom:24px">
+          <h1 style="font-size:22px">${title}</h1>
+          ${closable ? '<button data-act="close">닫기</button>' : ''}
+        </div>
+        ${body}
+      </div></div>`;
+    }
+
+    function renderLeader() {
+      if (modal.p == null) {
+        return modalFrame('리더 확인', `<p class="sub">확인할 플레이어를 선택하세요.</p>` +
+          playerPicker('m-pick', i => S.players[i].checked ? '✓ 확인함' : ''));
+      }
+      const p = S.players[modal.p];
+      return modalFrame(`${esc(p.name)}님`, `
+        <div class="stack">
+          <div class="role ${p.leader ? 'leader' : ''}">
+            <div class="emoji">${p.leader ? '👑' : '🙂'}</div>
+            <div class="name">${p.leader ? `${TEAM_NAME[p.team]} 팀 리더` : '리더가 아닙니다'}</div>
+            <p style="margin:8px 0 0">${p.leader ? '당신이 죽으면 팀이 패배합니다. 팀원에게도 비밀입니다.' : `${TEAM_NAME[p.team]} 팀원입니다.`}</p>
+          </div>
+          <div class="center"><button class="big" data-act="m-hide">가리기</button></div>
+        </div>`, false);
+    }
+
+    function renderArm() {
+      if (modal.p == null) {
+        return modalFrame('무기 장착', `<p class="sub">장착할 플레이어를 선택하세요.</p>` +
+          playerPicker('m-pick', i => armed(S.players[i]) ? '✓ 장착함' : ''));
+      }
+      const i = modal.p;
+      const p = S.players[i];
+      const left = remainingStock(p.team, i);
+      const row = arm => {
+        const otherArm = arm === 'L' ? 'R' : 'L';
+        return `<div>
+          <div class="step-label" style="margin-bottom:8px">${ARM_NAME[arm][0]}손</div>
+          <div class="weapon-pick">${KINDS.map(k => {
+            const avail = left[k] - (modal[otherArm] === k ? 1 : 0);
+            return `<button class="${modal[arm] === k ? 'on' : ''}" data-act="m-weapon" data-arm="${arm}" data-v="${k}" ${avail > 0 || modal[arm] === k ? '' : 'disabled'}>
+              ${wpn(k)}<span class="mark">팀 남은 ${Math.max(0, avail)}</span></button>`;
+          }).join('')}</div>
+        </div>`;
+      };
+      return modalFrame(`${esc(p.name)}님 무기 장착 · ${TEAM_NAME[p.team]}`, `
+        <div class="card stack">
+          ${row('L')}
+          ${row('R')}
+          <p class="muted" style="margin-bottom:0;font-size:13px">장착한 위치는 게임 중 바꿀 수 없습니다.</p>
+          <div class="row">
+            <button class="primary big" data-act="m-save" ${modal.L && modal.R ? '' : 'disabled'}>저장하고 가리기</button>
+            <button class="big" data-act="m-hide">취소</button>
+          </div>
+        </div>`, false);
+    }
+
+    function renderModal() {
+      if (!modal) return '';
+      if (modal.kind === 'leader') return renderLeader();
+      if (modal.kind === 'arm') return renderArm();
+      return '';
+    }
+
+    // ---------- 렌더 ----------
+
+    function render() {
+      const fn = { setup: renderSetup, prep: renderPrep, playing: renderPlaying, final: renderFinal }[S.phase];
+      app.innerHTML = fn();
+      // 뒤로가기: 설정 화면에서는 게임 목록으로, 그 외 화면에서는 설정 화면으로
+      const back = document.getElementById('back');
+      if (S.phase === 'setup') {
+        back.href = '../index.html';
+        back.textContent = '← 게임 목록';
+        delete back.dataset.act;
+      } else {
+        back.href = '#';
+        back.textContent = '← 설정';
+        back.dataset.act = 'to-setup';
+      }
+      modalEl.innerHTML = renderModal();
+      document.body.style.overflow = modal ? 'hidden' : '';
+    }
+
+    function commit() {
+      save();
+      render();
+    }
+
+    // 단계별로 받을 수 있는 입력
+    const ALLOWED = { act: ['attack', 'pass'], doubtAtk: ['doubt', 'nodoubt'], defend: ['defend'], doubtDef: ['doubt', 'nodoubt'] };
+
+    // 진행 입력 하나를 기록한다. 리더가 죽으면 결과 화면으로 간다.
+    // 화면이 늦게 갱신돼 지난 단계의 버튼이 눌린 경우 등 맞지 않는 입력은 버린다.
+    function push(e) {
+      const c = compute();
+      const declarer = c.open && (c.stage === 'doubtAtk' ? c.open.a : c.open.target);
+      if (S.phase !== 'playing' || c.winner != null || !ALLOWED[c.stage].includes(e.type) ||
+          (e.type === 'doubt' && (!c.st[e.by].alive || e.by === declarer))) { render(); return; }
+      S.events.push(e);
+      draft = {};
+      if (compute().winner != null) S.phase = 'final';
+      commit();
+    }
+
+    // ---------- 이벤트 ----------
+
+    function addName() {
+      const input = document.getElementById('name');
+      const nm = input.value.trim();
+      nameError = '';
+      if (!nm) return;
+      if (S.roster.some(r => r.name === nm)) {
+        nameError = `'${esc(nm)}'은(는) 이미 등록된 이름입니다.`;
+        render();
+      } else {
+        if (!confirmPrepReset()) return;
+        S.roster.push({ name: nm, team: null });
+        commit();
+      }
+      document.getElementById('name').focus();
+    }
+
+    const actions = {
+      'add-name': addName,
+      'del-name': el => {
+        if (!confirmPrepReset()) return;
+        S.roster.splice(Number(el.dataset.i), 1);
+        nameError = '';
+        commit();
+      },
+      'set-team': el => {
+        const r = S.roster[Number(el.dataset.i)];
+        const team = r.team === el.dataset.team ? null : el.dataset.team;
+        if (!confirmPrepReset()) return;
+        r.team = team;
+        commit();
+      },
+      'random-teams': () => {
+        if (S.roster.some(r => r.team) && !confirm('지금 정한 팀을 지우고 무작위로 다시 나눌까요?')) return;
+        if (!confirmPrepReset()) return;
+        const order = shuffle([...S.roster.keys()]);
+        order.forEach((ri, k) => { S.roster[ri].team = k < order.length / 2 ? 'V' : 'F'; });
+        commit();
+      },
+      'to-prep': () => { ensurePlayers(); S.phase = 'prep'; commit(); },
+      'to-setup': () => {
+        modal = null;
+        draft = {};
+        S = toSetup(S);
+        commit();
+      },
+      'resume': () => {
+        S = saved;
+        saved = null;
+        save(SAVED_KEY, null);
+        draft = {};
+        commit();
+      },
+      'redraw': () => {
+        if (S.players.some(p => p.checked) && !confirm('이미 리더를 확인한 플레이어가 있습니다. 다시 뽑으면 모두 다시 확인해야 합니다. 계속할까요?')) return;
+        drawLeaders();
+        commit();
+      },
+      'open-leader': () => { modal = { kind: 'leader', p: null }; render(); },
+      'open-arm': () => { modal = { kind: 'arm', p: null }; render(); },
+      'close': () => { modal = null; render(); },
+      'm-pick': el => {
+        const i = Number(el.dataset.i);
+        modal = { kind: modal.kind, p: i, L: S.players[i].L, R: S.players[i].R };
+        // 이름을 누르면 바로 본인 화면이 열린다. 리더 확인은 연 것으로 확인 처리.
+        if (modal.kind === 'leader') S.players[i].checked = true;
+        commit();
+      },
+      'm-hide': () => { modal = { kind: modal.kind, p: null }; render(); },
+      'm-weapon': el => { modal[el.dataset.arm] = el.dataset.v; render(); },
+      'm-save': () => {
+        const p = S.players[modal.p];
+        p.L = modal.L;
+        p.R = modal.R;
+        modal = { kind: modal.kind, p: null };
+        commit();
+      },
+      'set-order': el => {
+        const i = Number(el.dataset.i);
+        const p = S.players[i];
+        const team = membersOf(p.team);
+        if (p.order != null) {
+          // 해제하면 뒤 번호를 하나씩 당긴다.
+          const o = p.order;
+          p.order = null;
+          team.forEach(j => { if (S.players[j].order > o) S.players[j].order -= 1; });
+        } else {
+          p.order = team.filter(j => S.players[j].order != null).length;
+        }
+        commit();
+      },
+      'random-order': el => {
+        shuffle(membersOf(el.dataset.team)).forEach((i, k) => { S.players[i].order = k; });
+        commit();
+      },
+      'clear-order': el => {
+        membersOf(el.dataset.team).forEach(i => { S.players[i].order = null; });
+        commit();
+      },
+      'coin': () => { S.firstTeam = Math.random() < 0.5 ? 'V' : 'F'; commit(); },
+      'first': el => { S.firstTeam = el.dataset.team; commit(); },
+      'start': () => {
+        if (S.players.some(p => !p.checked) &&
+            !confirm('아직 리더를 확인하지 않은 플레이어가 있습니다. 시작할까요?')) return;
+        if (saved && saved.phase !== 'final' &&
+            !confirm('진행 중이던 게임 기록이 사라집니다. 새 게임을 시작할까요?')) return;
+        saved = null;
+        save(SAVED_KEY, null);
+        S.events = [];
+        S.phase = 'playing';
+        draft = {};
+        commit();
+      },
+      'toggle-reveal': () => { S.reveal = !S.reveal; commit(); },
+      'd-arm': el => { draft.arm = el.dataset.v; render(); },
+      'd-claim': el => { draft.claim = el.dataset.v; render(); },
+      'd-target': el => { draft.target = Number(el.dataset.i); render(); },
+      'attack': () => {
+        if (!draft.arm || !draft.claim || draft.target == null) return;
+        push({ type: 'attack', arm: draft.arm, claim: draft.claim, target: draft.target });
+      },
+      'pass': () => {
+        if (!confirm(`${S.players[compute().cur].name}님이 패스할까요?`)) return;
+        push({ type: 'pass' });
+      },
+      'nodoubt': () => push({ type: 'nodoubt' }),
+      'doubt': el => {
+        const by = Number(el.dataset.i);
+        const c = compute();
+        const t = c.open;
+        const [x, arm] = c.stage === 'doubtAtk' ? [t.a, t.arm] : [t.target, t.def];
+        if (!confirm(`${S.players[by].name}님이 ${S.players[x].name}님의 ${ARM_NAME[arm]} 무기를 의심합니다. 실제 무기를 공개할까요?`)) return;
+        push({ type: 'doubt', by });
+      },
+      'defend': el => {
+        const arm = el.dataset.v || null;
+        const c = compute();
+        if (arm && !canShield(c.st[c.open.target], arm, DMG[c.open.claim])) { render(); return; }
+        if (!arm && !confirm(`${S.players[c.open.target].name}님이 방어하지 않으면 사망합니다. 기록할까요?`)) return;
+        push({ type: 'defend', arm });
+      },
+      'undo': () => {
+        if (!confirm('마지막 입력 1개를 취소할까요?')) return;
+        S.events.pop();
+        S.phase = 'playing';
+        draft = {};
+        commit();
+      },
+      'new-same': () => {
+        if (!confirm('같은 명단과 팀으로 새 게임을 준비할까요? 리더를 다시 뽑고, 현재 기록은 지워집니다.')) return;
+        S = newState(S);
+        commit();
+      },
+      'reset-all': () => {
+        if (!confirm('명단을 포함해 모든 데이터를 지울까요?')) return;
+        S = newState();
+        commit();
+      }
+    };
+
+    document.addEventListener('click', ev => {
+      const el = ev.target.closest('[data-act]');
+      if (!el || el.disabled) return;
+      if (el.tagName === 'A') ev.preventDefault();
+      actions[el.dataset.act](el);
+    });
+
+    document.addEventListener('keydown', ev => {
+      // 한글 조합 중 Enter 는 조합 완료용이므로 무시한다.
+      if (ev.key !== 'Enter' || ev.isComposing) return;
+      if (ev.target.id === 'name') { ev.preventDefault(); addName(); }
+    });
+
+    render();
+  </script>
+</body>
+</html>
